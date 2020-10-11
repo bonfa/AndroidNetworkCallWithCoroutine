@@ -14,12 +14,10 @@ class WeatherViewModel : ViewModel() {
 
     private val message = MutableLiveData<ViewMessage>()
     private val weather = MutableLiveData<ViewWeather>()
-    private val weatherVisible = MutableLiveData<Boolean>()
     private val loaderVisible = MutableLiveData<Boolean>()
 
     fun message(): LiveData<ViewMessage> = message
     fun weather(): LiveData<ViewWeather> = weather
-    fun isWeatherVisible(): LiveData<Boolean> = weatherVisible
     fun isLoaderVisible(): LiveData<Boolean> = loaderVisible
 
     fun updateWeather() {
@@ -29,15 +27,14 @@ class WeatherViewModel : ViewModel() {
                 val weatherResponse = repository.getWeatherFor(locationId)
                 if (weatherResponse.consolidated_weather.isEmpty()) {
                     message.value = ViewMessage.visibleWithContent("no location found")
-                    weatherVisible.value = false
+                    weather.value = ViewWeather.hidden()
                 } else {
                     message.value = ViewMessage.hidden()
-                    weather.value = toViewModel(weatherResponse.consolidated_weather.first())
-                    weatherVisible.value = true
+                    weather.value = ViewWeather.visibleWithContent(toViewModel(weatherResponse.consolidated_weather.first()))
                 }
             } catch (e: Exception) {
                 message.value = ViewMessage.visibleWithContent("network error")
-                weatherVisible.value = false
+                weather.value = ViewWeather.hidden()
             } finally {
                 loaderVisible.value = false
             }
@@ -45,7 +42,7 @@ class WeatherViewModel : ViewModel() {
     }
 
     private fun toViewModel(weather: Weather) =
-        ViewWeather(
+        ViewWeatherContent(
             weatherStateName = weather.weather_state_name,
             windDirectionCompass = weather.wind_direction_compass,
             applicableDate = weather.applicable_date,
@@ -61,7 +58,7 @@ class WeatherViewModel : ViewModel() {
     fun resetView() {
         loaderVisible.value = true
         message.value = ViewMessage.visibleWithContent("view reset")
-        weatherVisible.value = false
+        weather.value = ViewWeather.hidden()
         loaderVisible.value = false
     }
 
@@ -80,7 +77,17 @@ data class ViewMessage private constructor(
     }
 }
 
-data class ViewWeather(
+data class ViewWeather private constructor(
+    val visible: Boolean,
+    val content: ViewWeatherContent?
+) {
+    companion object {
+        fun visibleWithContent(content: ViewWeatherContent): ViewWeather = ViewWeather(true, content)
+        fun hidden(): ViewWeather = ViewWeather(false, null)
+    }
+}
+
+data class ViewWeatherContent(
     val weatherStateName: String,
     val windDirectionCompass: String,
     val applicableDate: String,

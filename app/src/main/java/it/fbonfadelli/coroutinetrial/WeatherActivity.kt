@@ -33,8 +33,7 @@ class WeatherActivity : AppCompatActivity() {
         viewModel = WeatherViewModel.INSTANCE
         viewModel.isLoaderVisible().observe(this, Observer(this::updateLoaderVisibility))
         viewModel.message().observe(this, Observer(this::updateMessage))
-        viewModel.isWeatherVisible().observe(this, Observer(this::updateWeatherDetailVisibility))
-        viewModel.weather().observe(this, Observer(this::updateWeatherDetail))
+        viewModel.weather().observe(this, Observer(this::updateWeather))
     }
 
     private fun bindView() {
@@ -53,23 +52,24 @@ class WeatherActivity : AppCompatActivity() {
     }
 
     private fun updateLoaderVisibility(visible: Boolean) {
-        this.loader.visibility = if (visible) VISIBLE else GONE
+        loader.visibility = if (visible) VISIBLE else GONE
     }
 
     private fun updateMessage(viewMessage: ViewMessage) {
-        this.errorMessage.text = viewMessage.content
-        this.errorMessage.visibility = if (viewMessage.visible) VISIBLE else GONE
+        errorMessage.text = viewMessage.content
+        errorMessage.visibility = if (viewMessage.visible) VISIBLE else GONE
     }
 
-    private fun updateWeatherDetail(viewModel: ViewWeather) {
-        stateName.text = viewModel.weatherStateName
-        windSpeedContent.text = viewModel.windSpeed
-        windDirectionContent.text = viewModel.windDirection
-        windDirectionCompContent.text = viewModel.windDirectionCompass
+    private fun updateWeather(viewWeather: ViewWeather) {
+        detailContainer.visibility = if (viewWeather.visible) VISIBLE else GONE
+        viewWeather.content?.let { updateWeatherContent(it) }
     }
 
-    private fun updateWeatherDetailVisibility(visible: Boolean) {
-        this.detailContainer.visibility = if (visible) VISIBLE else GONE
+    private fun updateWeatherContent(viewModelContent: ViewWeatherContent) {
+        stateName.text = viewModelContent.weatherStateName
+        windSpeedContent.text = viewModelContent.windSpeed
+        windDirectionContent.text = viewModelContent.windDirection
+        windDirectionCompContent.text = viewModelContent.windDirectionCompass
     }
 
     override fun onResume() {
