@@ -52,17 +52,17 @@ class WeatherActivity : AppCompatActivity() {
     }
 
     private fun updateLoaderVisibility(visible: Boolean) {
-        loader.visibility = if (visible) VISIBLE else GONE
+        updateViewVisibility(loader, visible)
     }
 
     private fun updateMessage(viewMessage: Visible<String>) {
         errorMessage.text = viewMessage.content
-        errorMessage.visibility = if (viewMessage.visible) VISIBLE else GONE
+        updateViewVisibility(errorMessage, viewMessage.visible)
     }
 
     private fun updateWeather(viewWeather: Visible<ViewWeatherContent>) {
-        detailContainer.visibility = if (viewWeather.visible) VISIBLE else GONE
         viewWeather.content?.let { updateWeatherContent(it) }
+        updateViewVisibility(detailContainer, viewWeather.visible)
     }
 
     private fun updateWeatherContent(viewModelContent: ViewWeatherContent) {
@@ -75,5 +75,9 @@ class WeatherActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.updateWeather()
+    }
+
+    private fun updateViewVisibility(view: View, isVisible: Boolean) {
+        view.visibility = if (isVisible) VISIBLE else GONE
     }
 }
