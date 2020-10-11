@@ -9,6 +9,8 @@ import kotlinx.coroutines.launch
 
 private const val locationId = "44418"
 
+//todo test
+
 class WeatherViewModel : ViewModel() {
     private val repository: WeatherRepository = WeatherRepository(WeatherServiceFactory.make())
 
