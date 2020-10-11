@@ -3,6 +3,7 @@ package it.fbonfadelli.coroutinetrial
 import android.os.Bundle
 import android.view.View
 import android.view.View.*
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +18,8 @@ class WeatherActivity : AppCompatActivity() {
     private lateinit var detailContainer: View
     private lateinit var errorMessage: TextView
     private lateinit var loader: ProgressBar
+    private lateinit var resetViewButton: Button
+    private lateinit var reloadButton: Button
 
     private lateinit var viewModel: WeatherViewModel
 
@@ -42,6 +45,11 @@ class WeatherActivity : AppCompatActivity() {
         windDirectionContent = findViewById(R.id.wind_direction_content)
         windDirectionCompContent = findViewById(R.id.wind_direction_comp_content)
         errorMessage = findViewById(R.id.no_content_message)
+        resetViewButton = findViewById(R.id.reset_view_button)
+        reloadButton = findViewById(R.id.reload_button)
+
+        reloadButton.setOnClickListener { viewModel.updateWeather() }
+        resetViewButton.setOnClickListener { viewModel.resetView() }
     }
 
     private fun updateLoaderVisibility(visible: Boolean) {

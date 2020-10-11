@@ -42,7 +42,7 @@
         android:id="@+id/detail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/resetViewButton"
+        app:layout_constraintBottom_toTopOf="@id/reset_view_button"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title">
@@ -135,7 +135,7 @@
 
 
     <Button
-        android:id="@+id/reloadButton"
+        android:id="@+id/reload_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
@@ -148,7 +148,7 @@
         app:layout_constraintRight_toRightOf="parent" />
 
     <Button
-        android:id="@+id/resetViewButton"
+        android:id="@+id/reset_view_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
@@ -156,7 +156,7 @@
         android:minWidth="180dp"
         android:text="Reset view"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/reloadButton"
+        app:layout_constraintBottom_toTopOf="@id/reload_button"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 

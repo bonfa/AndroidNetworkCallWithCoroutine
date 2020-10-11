@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 private const val locationId = "44418"
 
@@ -19,27 +20,35 @@ class WeatherViewModel : ViewModel() {
     private val loaderVisible = MutableLiveData<Boolean>()
 
     fun getErrorMessage(): LiveData<String> = errorMessage
-    fun isErrorMessageVisible(): LiveData<Boolean> = errorMessageVisible //todo does it make sense to separate the visibility from the content?
+    fun isErrorMessageVisible(): LiveData<Boolean> =
+        errorMessageVisible //todo does it make sense to separate the visibility from the content?
+
     fun getWeather(): LiveData<ViewWeather> = weather
     fun isWeatherVisible(): LiveData<Boolean> = weatherVisible
     fun isLoaderVisible(): LiveData<Boolean> = loaderVisible
 
     fun updateWeather() {
-        loaderVisible.value = true
         viewModelScope.launch {
-            val weatherResponse = repository.getWeatherFor(locationId)
-            if (weatherResponse.consolidated_weather.isEmpty()) {
-                errorMessageVisible.value = weatherResponse.consolidated_weather.isNotEmpty()
-                errorMessage.value = "an error occurred"
-                weather.value = null
+            try {
+                loaderVisible.value = true
+                val weatherResponse = repository.getWeatherFor(locationId)
+                if (weatherResponse.consolidated_weather.isEmpty()) {
+                    errorMessageVisible.value = true
+                    errorMessage.value = "no location found"
+                    weatherVisible.value = false
+                } else {
+                    errorMessageVisible.value = false
+                    errorMessage.value = ""
+                    weather.value = toViewModel(weatherResponse.consolidated_weather.first())
+                    weatherVisible.value = true
+                }
+            } catch (e: Exception) {
+                errorMessageVisible.value = true
+                errorMessage.value = "network error"
                 weatherVisible.value = false
-            } else {
-                errorMessageVisible.value = false
-                errorMessage.value = ""
-                weather.value = toViewModel(weatherResponse.consolidated_weather.first())
-                weatherVisible.value = true
+            } finally {
+                loaderVisible.value = false
             }
-            loaderVisible.value = false
         }
     }
 
@@ -56,6 +65,14 @@ class WeatherViewModel : ViewModel() {
             airPressure = "%.2f".format(weather.air_pressure),
             humidity = "%.2f".format(weather.humidity)
         )
+
+    fun resetView() {
+        loaderVisible.value = true
+        errorMessage.value = "view reset"
+        errorMessageVisible.value = true
+        weatherVisible.value = false
+        loaderVisible.value = false
+    }
 
     companion object {
         val INSTANCE = ViewModelFactory().create(WeatherViewModel::class.java)
