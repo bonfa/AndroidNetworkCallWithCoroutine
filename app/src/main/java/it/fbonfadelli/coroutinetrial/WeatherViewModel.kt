@@ -4,27 +4,63 @@ import ViewModelFactory
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+
+private const val locationId = "44418"
 
 class WeatherViewModel : ViewModel() {
+    private val repository: WeatherRepository = WeatherRepository(WeatherServiceFactory.make())
 
-    companion object {
-        val INSTANCE = ViewModelFactory().create(WeatherViewModel::class.java)
-    }
-
-    private val errorMessage = MutableLiveData<ViewMessage>()
+    private val errorMessage = MutableLiveData<String>()
     private val errorMessageVisible = MutableLiveData<Boolean>()
     private val weather = MutableLiveData<ViewWeather>()
     private val weatherVisible = MutableLiveData<Boolean>()
     private val loaderVisible = MutableLiveData<Boolean>()
 
-    fun getErrorMessage(): LiveData<ViewMessage> = errorMessage
+    fun getErrorMessage(): LiveData<String> = errorMessage
     fun isErrorMessageVisible(): LiveData<Boolean> = errorMessageVisible //todo does it make sense to separate the visibility from the content?
     fun getWeather(): LiveData<ViewWeather> = weather
     fun isWeatherVisible(): LiveData<Boolean> = weatherVisible
     fun isLoaderVisible(): LiveData<Boolean> = loaderVisible
-}
 
-data class ViewMessage(val content: String)
+    fun updateWeather() {
+        loaderVisible.value = true
+        viewModelScope.launch {
+            val weatherResponse = repository.getWeatherFor(locationId)
+            if (weatherResponse.consolidated_weather.isEmpty()) {
+                errorMessageVisible.value = weatherResponse.consolidated_weather.isNotEmpty()
+                errorMessage.value = "an error occurred"
+                weather.value = null
+                weatherVisible.value = false
+            } else {
+                errorMessageVisible.value = false
+                errorMessage.value = ""
+                weather.value = toViewModel(weatherResponse.consolidated_weather.first())
+                weatherVisible.value = true
+            }
+            loaderVisible.value = false
+        }
+    }
+
+    private fun toViewModel(weather: Weather) =
+        ViewWeather(
+            weatherStateName = weather.weather_state_name,
+            windDirectionCompass = weather.wind_direction_compass,
+            applicableDate = weather.applicable_date,
+            minTemperature = "%.2f".format(weather.min_temp),
+            maxTemperature = "%.2f".format(weather.max_temp),
+            currentTemperature = "%.2f".format(weather.the_temp),
+            windSpeed = "%.2f".format(weather.wind_speed),
+            windDirection = "%.2f".format(weather.wind_direction),
+            airPressure = "%.2f".format(weather.air_pressure),
+            humidity = "%.2f".format(weather.humidity)
+        )
+
+    companion object {
+        val INSTANCE = ViewModelFactory().create(WeatherViewModel::class.java)
+    }
+}
 
 data class ViewWeather(
     val weatherStateName: String,

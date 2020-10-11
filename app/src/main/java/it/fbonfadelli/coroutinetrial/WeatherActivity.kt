@@ -18,13 +18,15 @@ class WeatherActivity : AppCompatActivity() {
     private lateinit var errorMessage: TextView
     private lateinit var loader: ProgressBar
 
+    private lateinit var viewModel: WeatherViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         bindView()
 
-        val viewModel = WeatherViewModel.INSTANCE
+        viewModel = WeatherViewModel.INSTANCE
         viewModel.isErrorMessageVisible().observe(this, Observer(this::updateErrorMessageVisibility))
         viewModel.isLoaderVisible().observe(this, Observer(this::updateLoaderVisibility))
         viewModel.getErrorMessage().observe(this, Observer(this::updateErrorMessage))
@@ -39,6 +41,7 @@ class WeatherActivity : AppCompatActivity() {
         windSpeedContent = findViewById(R.id.wind_speed_content)
         windDirectionContent = findViewById(R.id.wind_direction_content)
         windDirectionCompContent = findViewById(R.id.wind_direction_comp_content)
+        errorMessage = findViewById(R.id.no_content_message)
     }
 
     private fun updateLoaderVisibility(visible: Boolean) {
@@ -49,8 +52,8 @@ class WeatherActivity : AppCompatActivity() {
         this.errorMessage.visibility = if (visible) VISIBLE else GONE
     }
 
-    private fun updateErrorMessage(errorMessage: ViewMessage) {
-        this.errorMessage.text = errorMessage.content
+    private fun updateErrorMessage(errorMessage: String) {
+        this.errorMessage.text = errorMessage
     }
 
     private fun updateWeatherDetail(viewModel: ViewWeather) {
@@ -62,5 +65,10 @@ class WeatherActivity : AppCompatActivity() {
 
     private fun updateWeatherDetailVisibility(visible: Boolean) {
         this.detailContainer.visibility = if (visible) VISIBLE else GONE
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.updateWeather()
     }
 }
