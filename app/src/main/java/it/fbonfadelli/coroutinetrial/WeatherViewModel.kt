@@ -20,8 +20,7 @@ class WeatherViewModel : ViewModel() {
     private val loaderVisible = MutableLiveData<Boolean>()
 
     fun getErrorMessage(): LiveData<String> = errorMessage
-    fun isErrorMessageVisible(): LiveData<Boolean> =
-        errorMessageVisible //todo does it make sense to separate the visibility from the content?
+    fun isErrorMessageVisible(): LiveData<Boolean> = errorMessageVisible //todo does it make sense to separate the visibility from the content?
 
     fun getWeather(): LiveData<ViewWeather> = weather
     fun isWeatherVisible(): LiveData<Boolean> = weatherVisible
