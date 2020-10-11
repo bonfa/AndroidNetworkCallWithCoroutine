@@ -21,23 +21,25 @@ class WeatherViewModel : ViewModel() {
     fun isLoaderVisible(): LiveData<Boolean> = loaderVisible
 
     fun updateWeather() {
-        viewModelScope.launch {
-            try {
-                loaderVisible.value = true
-                val weatherResponse = repository.getWeatherFor(locationId)
-                if (weatherResponse.consolidated_weather.isEmpty()) {
-                    message.value = Visible.visibleWithContent("no location found")
-                    weather.value = Visible.hidden()
-                } else {
-                    message.value = Visible.hidden()
-                    weather.value = Visible.visibleWithContent(toViewModel(weatherResponse.consolidated_weather.first()))
-                }
-            } catch (e: Exception) {
-                message.value = Visible.visibleWithContent("network error")
+        viewModelScope.launch { getViewModel() }
+    }
+
+    private suspend fun getViewModel() {
+        try {
+            loaderVisible.value = true
+            val weatherResponse = repository.getWeatherFor(locationId)
+            if (weatherResponse.consolidated_weather.isEmpty()) {
+                message.value = Visible.visibleWithContent("no location found")
                 weather.value = Visible.hidden()
-            } finally {
-                loaderVisible.value = false
+            } else {
+                message.value = Visible.hidden()
+                weather.value = Visible.visibleWithContent(toViewModel(weatherResponse.consolidated_weather.first()))
             }
+        } catch (e: Exception) {
+            message.value = Visible.visibleWithContent("network error")
+            weather.value = Visible.hidden()
+        } finally {
+            loaderVisible.value = false
         }
     }
 
