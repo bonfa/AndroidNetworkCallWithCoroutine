@@ -2,7 +2,8 @@ package it.fbonfadelli.coroutinetrial
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.*
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -30,11 +31,10 @@ class WeatherActivity : AppCompatActivity() {
         bindView()
 
         viewModel = WeatherViewModel.INSTANCE
-        viewModel.isErrorMessageVisible().observe(this, Observer(this::updateErrorMessageVisibility))
         viewModel.isLoaderVisible().observe(this, Observer(this::updateLoaderVisibility))
-        viewModel.getErrorMessage().observe(this, Observer(this::updateErrorMessage))
+        viewModel.message().observe(this, Observer(this::updateMessage))
         viewModel.isWeatherVisible().observe(this, Observer(this::updateWeatherDetailVisibility))
-        viewModel.getWeather().observe(this, Observer(this::updateWeatherDetail))
+        viewModel.weather().observe(this, Observer(this::updateWeatherDetail))
     }
 
     private fun bindView() {
@@ -56,12 +56,9 @@ class WeatherActivity : AppCompatActivity() {
         this.loader.visibility = if (visible) VISIBLE else GONE
     }
 
-    private fun updateErrorMessageVisibility(visible: Boolean) {
-        this.errorMessage.visibility = if (visible) VISIBLE else GONE
-    }
-
-    private fun updateErrorMessage(errorMessage: String) {
-        this.errorMessage.text = errorMessage
+    private fun updateMessage(viewMessage: ViewMessage) {
+        this.errorMessage.text = viewMessage.content
+        this.errorMessage.visibility = if (viewMessage.visible) VISIBLE else GONE
     }
 
     private fun updateWeatherDetail(viewModel: ViewWeather) {

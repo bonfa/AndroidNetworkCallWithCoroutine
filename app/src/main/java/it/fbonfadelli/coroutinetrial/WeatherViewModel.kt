@@ -6,23 +6,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 private const val locationId = "44418"
 
 class WeatherViewModel : ViewModel() {
     private val repository: WeatherRepository = WeatherRepository(WeatherServiceFactory.make())
 
-    private val errorMessage = MutableLiveData<String>()
-    private val errorMessageVisible = MutableLiveData<Boolean>()
+    private val message = MutableLiveData<ViewMessage>()
     private val weather = MutableLiveData<ViewWeather>()
     private val weatherVisible = MutableLiveData<Boolean>()
     private val loaderVisible = MutableLiveData<Boolean>()
 
-    fun getErrorMessage(): LiveData<String> = errorMessage
-    fun isErrorMessageVisible(): LiveData<Boolean> = errorMessageVisible //todo does it make sense to separate the visibility from the content?
-
-    fun getWeather(): LiveData<ViewWeather> = weather
+    fun message(): LiveData<ViewMessage> = message
+    fun weather(): LiveData<ViewWeather> = weather
     fun isWeatherVisible(): LiveData<Boolean> = weatherVisible
     fun isLoaderVisible(): LiveData<Boolean> = loaderVisible
 
@@ -32,18 +28,15 @@ class WeatherViewModel : ViewModel() {
                 loaderVisible.value = true
                 val weatherResponse = repository.getWeatherFor(locationId)
                 if (weatherResponse.consolidated_weather.isEmpty()) {
-                    errorMessageVisible.value = true
-                    errorMessage.value = "no location found"
+                    message.value = ViewMessage.visibleWithContent("no location found")
                     weatherVisible.value = false
                 } else {
-                    errorMessageVisible.value = false
-                    errorMessage.value = ""
+                    message.value = ViewMessage.hidden()
                     weather.value = toViewModel(weatherResponse.consolidated_weather.first())
                     weatherVisible.value = true
                 }
             } catch (e: Exception) {
-                errorMessageVisible.value = true
-                errorMessage.value = "network error"
+                message.value = ViewMessage.visibleWithContent("network error")
                 weatherVisible.value = false
             } finally {
                 loaderVisible.value = false
@@ -67,14 +60,23 @@ class WeatherViewModel : ViewModel() {
 
     fun resetView() {
         loaderVisible.value = true
-        errorMessage.value = "view reset"
-        errorMessageVisible.value = true
+        message.value = ViewMessage.visibleWithContent("view reset")
         weatherVisible.value = false
         loaderVisible.value = false
     }
 
     companion object {
         val INSTANCE = ViewModelFactory().create(WeatherViewModel::class.java)
+    }
+}
+
+data class ViewMessage private constructor(
+    val visible: Boolean,
+    val content: String
+) {
+    companion object {
+        fun visibleWithContent(content: String): ViewMessage = ViewMessage(true, content)
+        fun hidden(): ViewMessage = ViewMessage(false, "")
     }
 }
 
