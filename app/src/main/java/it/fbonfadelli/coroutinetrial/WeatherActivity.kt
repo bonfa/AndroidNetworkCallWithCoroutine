@@ -55,12 +55,12 @@ class WeatherActivity : AppCompatActivity() {
         loader.visibility = if (visible) VISIBLE else GONE
     }
 
-    private fun updateMessage(viewMessage: ViewMessage) {
+    private fun updateMessage(viewMessage: Visible<String>) {
         errorMessage.text = viewMessage.content
         errorMessage.visibility = if (viewMessage.visible) VISIBLE else GONE
     }
 
-    private fun updateWeather(viewWeather: ViewWeather) {
+    private fun updateWeather(viewWeather: Visible<ViewWeatherContent>) {
         detailContainer.visibility = if (viewWeather.visible) VISIBLE else GONE
         viewWeather.content?.let { updateWeatherContent(it) }
     }

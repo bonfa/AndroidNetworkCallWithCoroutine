@@ -12,12 +12,12 @@ private const val locationId = "44418"
 class WeatherViewModel : ViewModel() {
     private val repository: WeatherRepository = WeatherRepository(WeatherServiceFactory.make())
 
-    private val message = MutableLiveData<ViewMessage>()
-    private val weather = MutableLiveData<ViewWeather>()
+    private val message = MutableLiveData<Visible<String>>()
+    private val weather = MutableLiveData<Visible<ViewWeatherContent>>()
     private val loaderVisible = MutableLiveData<Boolean>()
 
-    fun message(): LiveData<ViewMessage> = message
-    fun weather(): LiveData<ViewWeather> = weather
+    fun message(): LiveData<Visible<String>> = message
+    fun weather(): LiveData<Visible<ViewWeatherContent>> = weather
     fun isLoaderVisible(): LiveData<Boolean> = loaderVisible
 
     fun updateWeather() {
@@ -26,15 +26,15 @@ class WeatherViewModel : ViewModel() {
                 loaderVisible.value = true
                 val weatherResponse = repository.getWeatherFor(locationId)
                 if (weatherResponse.consolidated_weather.isEmpty()) {
-                    message.value = ViewMessage.visibleWithContent("no location found")
-                    weather.value = ViewWeather.hidden()
+                    message.value = Visible.visibleWithContent("no location found")
+                    weather.value = Visible.hidden()
                 } else {
-                    message.value = ViewMessage.hidden()
-                    weather.value = ViewWeather.visibleWithContent(toViewModel(weatherResponse.consolidated_weather.first()))
+                    message.value = Visible.hidden()
+                    weather.value = Visible.visibleWithContent(toViewModel(weatherResponse.consolidated_weather.first()))
                 }
             } catch (e: Exception) {
-                message.value = ViewMessage.visibleWithContent("network error")
-                weather.value = ViewWeather.hidden()
+                message.value = Visible.visibleWithContent("network error")
+                weather.value = Visible.hidden()
             } finally {
                 loaderVisible.value = false
             }
@@ -57,8 +57,8 @@ class WeatherViewModel : ViewModel() {
 
     fun resetView() {
         loaderVisible.value = true
-        message.value = ViewMessage.visibleWithContent("view reset")
-        weather.value = ViewWeather.hidden()
+        message.value = Visible.visibleWithContent("view reset")
+        weather.value = Visible.hidden()
         loaderVisible.value = false
     }
 
@@ -67,23 +67,13 @@ class WeatherViewModel : ViewModel() {
     }
 }
 
-data class ViewMessage private constructor(
+data class Visible<T>private constructor(
     val visible: Boolean,
-    val content: String
-) {
+    val content: T?
+){
     companion object {
-        fun visibleWithContent(content: String): ViewMessage = ViewMessage(true, content)
-        fun hidden(): ViewMessage = ViewMessage(false, "")
-    }
-}
-
-data class ViewWeather private constructor(
-    val visible: Boolean,
-    val content: ViewWeatherContent?
-) {
-    companion object {
-        fun visibleWithContent(content: ViewWeatherContent): ViewWeather = ViewWeather(true, content)
-        fun hidden(): ViewWeather = ViewWeather(false, null)
+        fun <T> visibleWithContent(content: T): Visible<T> = Visible(true, content)
+        fun <T> hidden(): Visible<T> = Visible(false, null)
     }
 }
 
