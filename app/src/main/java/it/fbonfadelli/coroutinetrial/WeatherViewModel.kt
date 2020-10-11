@@ -67,7 +67,7 @@ class WeatherViewModel : ViewModel() {
     }
 }
 
-data class Visible<T>private constructor(
+class Visible<T>private constructor(
     val visible: Boolean,
     val content: T?
 ){
